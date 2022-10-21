@@ -113,7 +113,7 @@ class BaseDetector(metaclass=ABCMeta):
     @abstractmethod
     def load_model(self):
         pass
-
+    
     @abstractmethod
     def detect_batch_images(self, images:typing.Sequence[np.ndarray]):
         pass
