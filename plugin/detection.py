@@ -3,7 +3,6 @@
 # @Description: 目标检测子模块
 import typing
 from abc import ABCMeta, abstractmethod
-import copy
 import numpy as np
 
 
@@ -11,6 +10,7 @@ class Target(metaclass=ABCMeta):
     def __init__(self, box: typing.Sequence[int], conf: float):
         self._bbox = box
         self._conf = conf
+        self.check_box()
 
     def check_box(self):
         """
@@ -115,5 +115,6 @@ class BaseDetector(metaclass=ABCMeta):
         pass
     
     @abstractmethod
-    def detect_batch_images(self, images:typing.Sequence[np.ndarray]):
+    def detect_batch_images(self, images:typing.Sequence[np.ndarray]) -> BaseDetResults:
         pass
+

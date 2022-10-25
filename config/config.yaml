@@ -1,0 +1,3 @@
+# configs
+weight_path: '/data/cx/h2v_screen/weights/yolov5m-face.pt'
+device: 'cuda:1'
