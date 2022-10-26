@@ -6,7 +6,6 @@ from PIL import Image, ImageDraw, ImageFont
 import typing
 import matplotlib.pyplot as plt
 
-
 def draw_box(arr: np.ndarray, cords: typing.List[int], color: typing.Tuple[int, int, int],
              thickness: int) -> np.ndarray:
     """
@@ -15,13 +14,13 @@ def draw_box(arr: np.ndarray, cords: typing.List[int], color: typing.Tuple[int, 
     :param cords: 框的坐标，按照【xmin,ymin,xmax,ymax】的方式进行组织
     :param color: 框的颜色
     :param thickness: 框线的宽度
-    :return: 绘制好框后的图像仍然按照ndarray的数据格式
+    :return: 绘制好框后的图像仍然按照ndarray的数据格式s
     """
     assert len(cords) == 4, "cords must have 4 elements as xmin ymin xmax ymax."
     assert isinstance(arr, np.ndarray), "input must be type of numpy ndarray."
     img = Image.fromarray(arr)
     draw = ImageDraw.Draw(img)
-    draw.rectangle(xy=cords, fill=color, width=thickness)
+    draw.rectangle(xy=cords, outline=color, width=thickness)
     img = np.array(img)
     return img
 
