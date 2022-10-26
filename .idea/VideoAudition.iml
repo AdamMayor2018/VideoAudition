@@ -2,7 +2,7 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/models/detect/yolov5" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ensembles/detect/yolov5" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Remote Python 3.7.10 (sftp://ubuntu@10.5.101.151:22/home/ubuntu/anaconda3/envs/face_detection/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

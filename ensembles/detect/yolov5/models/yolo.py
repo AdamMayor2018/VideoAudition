@@ -8,14 +8,14 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-sys.path.append('./')  # to run '$ python *.py' files in subdirectories
+sys.path.append('/')  # to run '$ python *.py' files in subdirectories
 logger = logging.getLogger(__name__)
 
-from models.common import Conv, Bottleneck, SPP, DWConv, Focus, BottleneckCSP, C3, ShuffleV2Block, Concat, NMS, autoShape, StemBlock, BlazeBlock, DoubleBlazeBlock
-from models.experimental import MixConv2d, CrossConv
-from utils.autoanchor import check_anchor_order
-from utils.general import make_divisible, check_file, set_logging
-from utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, scale_img, initialize_weights, \
+from ensembles.detect.yolov5.models.common import Conv, Bottleneck, SPP, DWConv, Focus, BottleneckCSP, C3, ShuffleV2Block, Concat, NMS, autoShape, StemBlock, BlazeBlock, DoubleBlazeBlock
+from ensembles.detect.yolov5.models.experimental import MixConv2d, CrossConv
+from ensembles.detect.yolov5.utils.autoanchor import check_anchor_order
+from ensembles.detect.yolov5.utils.general import make_divisible, check_file, set_logging
+from ensembles.detect.yolov5.utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, scale_img, initialize_weights, \
     select_device, copy_attr
 
 try:
@@ -124,22 +124,22 @@ class Detect(nn.Module):
         anchor_grid = (self.anchors[i].clone() * self.stride[i]).view((1, self.na, 1, 1, 2)).expand((1, self.na, ny, nx, 2)).float()
         return grid, anchor_grid
 class Model(nn.Module):
-    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # models, input channels, number of classes
+    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # ensembles, input channels, number of classes
         super(Model, self).__init__()
         if isinstance(cfg, dict):
-            self.yaml = cfg  # models dict
+            self.yaml = cfg  # ensembles dict
         else:  # is *.yaml
             import yaml  # for torch hub
             self.yaml_file = Path(cfg).name
             with open(cfg) as f:
-                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # models dict
+                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # ensembles dict
 
-        # Define models
+        # Define ensembles
         ch = self.yaml['ch'] = self.yaml.get('ch', ch)  # input channels
         if nc and nc != self.yaml['nc']:
-            logger.info('Overriding models.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
+            logger.info('Overriding ensembles.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
             self.yaml['nc'] = nc  # override yaml value
-        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # models, savelist
+        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # ensembles, savelist
         self.names = [str(i) for i in range(self.yaml['nc'])]  # default names
         # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
@@ -217,11 +217,11 @@ class Model(nn.Module):
             print(('%6g Conv2d.bias:' + '%10.3g' * 6) % (mi.weight.shape[1], *b[:5].mean(1).tolist(), b[5:].mean()))
 
     # def _print_weights(self):
-    #     for m in self.models.modules():
+    #     for m in self.ensembles.modules():
     #         if type(m) is Bottleneck:
     #             print('%10.3g' % (m.w.detach().sigmoid() * 2))  # shortcut weights
 
-    def fuse(self):  # fuse models Conv2d() + BatchNorm2d() layers
+    def fuse(self):  # fuse ensembles Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ')
         for m in self.model.modules():
             if type(m) is Conv and hasattr(m, 'bn'):
@@ -249,11 +249,11 @@ class Model(nn.Module):
 
     def autoshape(self):  # add autoShape module
         print('Adding autoShape... ')
-        m = autoShape(self)  # wrap models
+        m = autoShape(self)  # wrap ensembles
         copy_attr(m, self, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())  # copy attributes
         return m
 
-    def info(self, verbose=False, img_size=640):  # print models information
+    def info(self, verbose=False, img_size=640):  # print ensembles information
         model_info(self, verbose, img_size)
 
 
@@ -324,14 +324,14 @@ from thop import profile
 from thop import clever_format
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='models.yaml')
+    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='ensembles.yaml')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     opt = parser.parse_args()
     opt.cfg = check_file(opt.cfg)  # check file
     set_logging()
     device = select_device(opt.device)
     
-    # Create models
+    # Create ensembles
     model = Model(opt.cfg).to(device)
     stride = model.stride.max()
     if stride == 32:

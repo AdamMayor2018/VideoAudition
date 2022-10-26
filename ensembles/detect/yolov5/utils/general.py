@@ -16,9 +16,9 @@ import torch
 import torchvision
 import yaml
 
-from utils.google_utils import gsutil_getsize
-from utils.metrics import fitness
-from utils.torch_utils import init_torch_seeds
+#from google_utils import gsutil_getsize
+#from metrics import fitness
+from ensembles.detect.yolov5.utils.torch_utils import init_torch_seeds
 
 # Settings
 torch.set_printoptions(linewidth=320, precision=5, profile='long')
@@ -371,41 +371,41 @@ def wh_iou(wh1, wh2):
     # iou = inter / (area1 + area2 - inter)
     return inter / (wh1.prod(2) + wh2.prod(2) - inter)
 
-def jaccard_diou(box_a, box_b, iscrowd:bool=False):
-    use_batch = True
-    if box_a.dim() == 2:
-        use_batch = False
-        box_a = box_a[None, ...]
-        box_b = box_b[None, ...]
-
-    inter = intersect(box_a, box_b)
-    area_a = ((box_a[:, :, 2]-box_a[:, :, 0]) *
-              (box_a[:, :, 3]-box_a[:, :, 1])).unsqueeze(2).expand_as(inter)  # [A,B]
-    area_b = ((box_b[:, :, 2]-box_b[:, :, 0]) *
-              (box_b[:, :, 3]-box_b[:, :, 1])).unsqueeze(1).expand_as(inter)  # [A,B]
-    union = area_a + area_b - inter
-    x1 = ((box_a[:, :, 2]+box_a[:, :, 0]) / 2).unsqueeze(2).expand_as(inter)
-    y1 = ((box_a[:, :, 3]+box_a[:, :, 1]) / 2).unsqueeze(2).expand_as(inter)
-    x2 = ((box_b[:, :, 2]+box_b[:, :, 0]) / 2).unsqueeze(1).expand_as(inter)
-    y2 = ((box_b[:, :, 3]+box_b[:, :, 1]) / 2).unsqueeze(1).expand_as(inter)
-
-    t1 = box_a[:, :, 1].unsqueeze(2).expand_as(inter)
-    b1 = box_a[:, :, 3].unsqueeze(2).expand_as(inter)
-    l1 = box_a[:, :, 0].unsqueeze(2).expand_as(inter)
-    r1 = box_a[:, :, 2].unsqueeze(2).expand_as(inter)
-
-    t2 = box_b[:, :, 1].unsqueeze(1).expand_as(inter)
-    b2 = box_b[:, :, 3].unsqueeze(1).expand_as(inter)
-    l2 = box_b[:, :, 0].unsqueeze(1).expand_as(inter)
-    r2 = box_b[:, :, 2].unsqueeze(1).expand_as(inter)
-
-    cr = torch.max(r1, r2)
-    cl = torch.min(l1, l2)
-    ct = torch.min(t1, t2)
-    cb = torch.max(b1, b2)
-    D = (((x2 - x1)**2 + (y2 - y1)**2) / ((cr-cl)**2 + (cb-ct)**2 + 1e-7))
-    out = inter / area_a if iscrowd else inter / (union + 1e-7) - D ** 0.7
-    return out if use_batch else out.squeeze(0)
+# def jaccard_diou(box_a, box_b, iscrowd:bool=False):
+#     use_batch = True
+#     if box_a.dim() == 2:
+#         use_batch = False
+#         box_a = box_a[None, ...]
+#         box_b = box_b[None, ...]
+#
+#     inter = intersect(box_a, box_b)
+#     area_a = ((box_a[:, :, 2]-box_a[:, :, 0]) *
+#               (box_a[:, :, 3]-box_a[:, :, 1])).unsqueeze(2).expand_as(inter)  # [A,B]
+#     area_b = ((box_b[:, :, 2]-box_b[:, :, 0]) *
+#               (box_b[:, :, 3]-box_b[:, :, 1])).unsqueeze(1).expand_as(inter)  # [A,B]
+#     union = area_a + area_b - inter
+#     x1 = ((box_a[:, :, 2]+box_a[:, :, 0]) / 2).unsqueeze(2).expand_as(inter)
+#     y1 = ((box_a[:, :, 3]+box_a[:, :, 1]) / 2).unsqueeze(2).expand_as(inter)
+#     x2 = ((box_b[:, :, 2]+box_b[:, :, 0]) / 2).unsqueeze(1).expand_as(inter)
+#     y2 = ((box_b[:, :, 3]+box_b[:, :, 1]) / 2).unsqueeze(1).expand_as(inter)
+#
+#     t1 = box_a[:, :, 1].unsqueeze(2).expand_as(inter)
+#     b1 = box_a[:, :, 3].unsqueeze(2).expand_as(inter)
+#     l1 = box_a[:, :, 0].unsqueeze(2).expand_as(inter)
+#     r1 = box_a[:, :, 2].unsqueeze(2).expand_as(inter)
+#
+#     t2 = box_b[:, :, 1].unsqueeze(1).expand_as(inter)
+#     b2 = box_b[:, :, 3].unsqueeze(1).expand_as(inter)
+#     l2 = box_b[:, :, 0].unsqueeze(1).expand_as(inter)
+#     r2 = box_b[:, :, 2].unsqueeze(1).expand_as(inter)
+#
+#     cr = torch.max(r1, r2)
+#     cl = torch.min(l1, l2)
+#     ct = torch.min(t1, t2)
+#     cb = torch.max(b1, b2)
+#     D = (((x2 - x1)**2 + (y2 - y1)**2) / ((cr-cl)**2 + (cb-ct)**2 + 1e-7))
+#     out = inter / area_a if iscrowd else inter / (union + 1e-7) - D ** 0.7
+#     return out if use_batch else out.squeeze(0)
 
 
 def non_max_suppression_face(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=False, labels=()):
@@ -587,43 +587,43 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
     for key in 'optimizer', 'training_results', 'wandb_id':
         x[key] = None
     x['epoch'] = -1
-    x['models'].half()  # to FP16
-    for p in x['models'].parameters():
+    x['ensembles'].half()  # to FP16
+    for p in x['ensembles'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize
     print('Optimizer stripped from %s,%s %.1fMB' % (f, (' saved as %s,' % s) if s else '', mb))
 
 
-def print_mutation(hyp, results, yaml_file='hyp_evolved.yaml', bucket=''):
-    # Print mutation results to evolve.txt (for use with train.py --evolve)
-    a = '%10s' * len(hyp) % tuple(hyp.keys())  # hyperparam keys
-    b = '%10.3g' * len(hyp) % tuple(hyp.values())  # hyperparam values
-    c = '%10.4g' * len(results) % results  # results (P, R, mAP@0.5, mAP@0.5:0.95, val_losses x 3)
-    print('\n%s\n%s\nEvolved fitness: %s\n' % (a, b, c))
-
-    if bucket:
-        url = 'gs://%s/evolve.txt' % bucket
-        if gsutil_getsize(url) > (os.path.getsize('evolve.txt') if os.path.exists('evolve.txt') else 0):
-            os.system('gsutil cp %s .' % url)  # download evolve.txt if larger than local
-
-    with open('evolve.txt', 'a') as f:  # append result
-        f.write(c + b + '\n')
-    x = np.unique(np.loadtxt('evolve.txt', ndmin=2), axis=0)  # load unique rows
-    x = x[np.argsort(-fitness(x))]  # sort
-    np.savetxt('evolve.txt', x, '%10.3g')  # save sort by fitness
-
-    # Save yaml
-    for i, k in enumerate(hyp.keys()):
-        hyp[k] = float(x[0, i + 7])
-    with open(yaml_file, 'w') as f:
-        results = tuple(x[0, :7])
-        c = '%10.4g' * len(results) % results  # results (P, R, mAP@0.5, mAP@0.5:0.95, val_losses x 3)
-        f.write('# Hyperparameter Evolution Results\n# Generations: %g\n# Metrics: ' % len(x) + c + '\n\n')
-        yaml.dump(hyp, f, sort_keys=False)
-
-    if bucket:
-        os.system('gsutil cp evolve.txt %s gs://%s' % (yaml_file, bucket))  # upload
+# def print_mutation(hyp, results, yaml_file='hyp_evolved.yaml', bucket=''):
+#     # Print mutation results to evolve.txt (for use with train.py --evolve)
+#     a = '%10s' * len(hyp) % tuple(hyp.keys())  # hyperparam keys
+#     b = '%10.3g' * len(hyp) % tuple(hyp.values())  # hyperparam values
+#     c = '%10.4g' * len(results) % results  # results (P, R, mAP@0.5, mAP@0.5:0.95, val_losses x 3)
+#     print('\n%s\n%s\nEvolved fitness: %s\n' % (a, b, c))
+#
+#     if bucket:
+#         url = 'gs://%s/evolve.txt' % bucket
+#         if gsutil_getsize(url) > (os.path.getsize('evolve.txt') if os.path.exists('evolve.txt') else 0):
+#             os.system('gsutil cp %s .' % url)  # download evolve.txt if larger than local
+#
+#     with open('evolve.txt', 'a') as f:  # append result
+#         f.write(c + b + '\n')
+#     x = np.unique(np.loadtxt('evolve.txt', ndmin=2), axis=0)  # load unique rows
+#     x = x[np.argsort(-fitness(x))]  # sort
+#     np.savetxt('evolve.txt', x, '%10.3g')  # save sort by fitness
+#
+#     # Save yaml
+#     for i, k in enumerate(hyp.keys()):
+#         hyp[k] = float(x[0, i + 7])
+#     with open(yaml_file, 'w') as f:
+#         results = tuple(x[0, :7])
+#         c = '%10.4g' * len(results) % results  # results (P, R, mAP@0.5, mAP@0.5:0.95, val_losses x 3)
+#         f.write('# Hyperparameter Evolution Results\n# Generations: %g\n# Metrics: ' % len(x) + c + '\n\n')
+#         yaml.dump(hyp, f, sort_keys=False)
+#
+#     if bucket:
+#         os.system('gsutil cp evolve.txt %s gs://%s' % (yaml_file, bucket))  # upload
 
 
 def apply_classifier(x, model, img, im0):

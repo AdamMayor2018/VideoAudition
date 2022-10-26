@@ -1,3 +1,7 @@
-# configs
-weight_path: '/data/cx/h2v_screen/weights/yolov5m-face.pt'
+# 目标检测相关参数
+weight_path: '/data/cx/VideoAudition/weights/yolov5m-face.pt'
 device: 'cuda:1'
+img_size: 800 #推理时候的尺寸
+conf_thres: 0.3 #NMS的置信度
+iou_thres: 0.5 #NMS的iou阈值
+kept_conf: 0.50 #保留检测结果的置信度，低于这个值的会被过滤

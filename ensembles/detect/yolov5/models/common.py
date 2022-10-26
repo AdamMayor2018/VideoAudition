@@ -7,10 +7,9 @@ import requests
 import torch
 import torch.nn as nn
 from PIL import Image, ImageDraw
-
-from utils.datasets import letterbox
-from utils.general import non_max_suppression, make_divisible, scale_coords, xyxy2xywh
-from utils.plots import color_list
+from ensembles.detect.yolov5.utils.datasets import letterbox
+from ensembles.detect.yolov5.utils.general import non_max_suppression, make_divisible, scale_coords, xyxy2xywh
+from ensembles.detect.yolov5.utils.plots import color_list
 
 def autopad(k, p=None):  # kernel, padding
     # Pad to 'same'
@@ -301,7 +300,7 @@ class NMS(nn.Module):
         return non_max_suppression(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)
 
 class autoShape(nn.Module):
-    # input-robust models wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    # input-robust ensembles wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
     img_size = 640  # inference size (pixels)
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold
@@ -312,7 +311,7 @@ class autoShape(nn.Module):
         self.model = model.eval()
 
     def autoshape(self):
-        print('autoShape already enabled, skipping... ')  # models already converted to models.autoshape()
+        print('autoShape already enabled, skipping... ')  # ensembles already converted to ensembles.autoshape()
         return self
 
     def forward(self, imgs, size=640, augment=False, profile=False):

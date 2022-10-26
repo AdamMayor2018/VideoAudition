@@ -4,8 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from models.common import Conv, DWConv
-from utils.google_utils import attempt_download
+from ensembles.detect.yolov5.models.common import Conv, DWConv
+from ensembles.detect.yolov5.utils.google_utils import attempt_download
 
 
 class CrossConv(nn.Module):
@@ -111,11 +111,11 @@ class Ensemble(nn.ModuleList):
 
 
 def attempt_load(weights, map_location=None):
-    # Loads an ensemble of yolov5 weights=[a,b,c] or a single models weights=[a] or weights=a
+    # Loads an ensemble of yolov5 weights=[a,b,c] or a single ensembles weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         attempt_download(w)
-        model.append(torch.load(w, map_location=map_location)['models'].float().fuse().eval())  # load FP32 models
+        model.append(torch.load(w, map_location=map_location)['ensembles'].float().fuse().eval())  # load FP32 ensembles
 
     # Compatibility updates
     for m in model.modules():
@@ -125,7 +125,7 @@ def attempt_load(weights, map_location=None):
             m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
 
     if len(model) == 1:
-        return model[-1]  # return models
+        return model[-1]  # return ensembles
     else:
         print('Ensemble created with %s\n' % weights)
         for k in ['names', 'stride']:

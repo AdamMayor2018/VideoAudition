@@ -1,6 +1,6 @@
 # parameters
 nc: 1  # number of classes
-depth_multiple: 1.0  # models depth multiple
+depth_multiple: 1.0  # ensembles depth multiple
 width_multiple: 1.0  # layer channel multiple
 
 # anchors
@@ -24,10 +24,15 @@ backbone:
 
 # YOLOv5 head
 head:
-  [[-1, 1, Conv, [64, 1, 1]],  # 8 (P4/32-large)
+  [[-1, 1, Conv, [48, 1, 1]],  # 8
    [-1, 1, nn.Upsample, [None, 2, 'nearest']],
    [[-1, 5], 1, Concat, [1]],  # cat backbone P3
-   [-1, 1, Conv, [64, 1, 1]],  # 11 (P3/8-medium)
+   [-1, 1, Conv, [48, 1, 1]],  # 11 (P3/8-medium)
 
-   [[11, 8], 1, Detect, [nc, anchors]],  # Detect(P3, P4)
+   [-1, 1, nn.MaxPool2d, [3, 2, 1]],  # 12
+   [[-1, 7], 1, Concat, [1]],  # cat backbone P3
+   [-1, 1, Conv, [48, 1, 1]],  # 14 (P4/16-large)
+
+   [[11, 14], 1, Detect, [nc, anchors]],  # Detect(P3, P4)
   ]
+

@@ -1,8 +1,10 @@
 # @Time : 2022/10/25 16:49 
 # @Author : CaoXiang
 # @Description:
+import os
+
 from config.conf_loader import YamlConfigLoader
-from models.detect.yolov5 import non_max_suppression_face, scale_coords, check_img_size
+from ensembles.detect.yolov5.utils.general import non_max_suppression_face, scale_coords, check_img_size
 from plugin.detection import BaseDetector, BaseDetResults, FaceDetResults, Face, Target
 import torch
 import cv2
@@ -10,9 +12,8 @@ import numpy as np
 import copy
 import typing
 import torch.nn as nn
-from model.common import Conv
-from utils.datasets import letterbox
-
+from ensembles.detect.yolov5.models.common import Conv
+from ensembles.detect.yolov5.utils.datasets import letterbox
 
 class Yolo5Detector(BaseDetector):
     """
