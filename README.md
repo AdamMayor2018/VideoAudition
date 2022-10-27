@@ -12,4 +12,7 @@
    
 ## 支持模型   
 一.检测算法   
-1.yolov5  
+1.yolov5   
+2.retinaface  
+二.特征embedding  
+1.arcface  
