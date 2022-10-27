@@ -7,8 +7,9 @@ import numpy as np
 
 
 class Target(metaclass=ABCMeta):
-    def __init__(self, box: typing.Sequence[int], conf: float):
+    def __init__(self, box: typing.Sequence[int], kps:np.ndarray, conf: float):
         self._bbox = box
+        self._kps = kps
         self._conf = conf
         self.check_box()
 
@@ -31,6 +32,10 @@ class Target(metaclass=ABCMeta):
     @property
     def bbox(self) -> typing.Sequence[int]:
         return self._bbox
+
+    @property
+    def kps(self) -> np.ndarray:
+        return self._kps
 
     @bbox.setter
     def bbox(self, new_bbox):

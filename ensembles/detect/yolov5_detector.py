@@ -4,7 +4,7 @@
 import os
 
 from config.conf_loader import YamlConfigLoader
-from ensembles.detect.yolov5.utils.general import non_max_suppression_face, scale_coords, check_img_size
+from ensembles.detect.yolov5.utils.general import non_max_suppression_face, scale_coords, check_img_size, scale_coords_landmarks
 from plugin.detection import BaseDetector, BaseDetResults, FaceDetResults, Face, Target
 import torch
 import cv2
@@ -75,15 +75,16 @@ class Yolo5Detector(BaseDetector):
             if det.shape[0] > 0:
                 #print(inputs[i].shape, det.shape)
                 det[:, :4] = scale_coords(inputs[i].shape[1:], det[:, :4], images[i].shape).round()
-                #det[:, 5:15] = scale_coords_landmarks(img.shape[2:], det[:, 5:15], image.shape).round()
-                det = det[:, 0:5]
+                det[:, 5:15] = scale_coords_landmarks(inputs[i].shape[1:], det[:, 5:15], images[i].shape).round()
+                #det = det[:, 0:5]
                 det = det.cpu().numpy()
                 #det = det[np.argsort(det[:, 0])]
                 bboxs = det[:, :4].tolist()
                 confs = det[:, 4].tolist()
+                kps = det[:, 5:15]
                 for j, (box, conf) in enumerate(zip(bboxs, confs)):
                     if conf > self._kept_conf:
-                        tar = Target(box, conf)
+                        tar = Target(box, kps, conf)
                         targets.append(tar)
             targets = targets if targets else []
             results.append(BaseDetResults(targets))

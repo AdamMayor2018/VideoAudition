@@ -25,8 +25,9 @@ result = detector.detect_batch_images(images)
 print(result)
 for _, (img, res, name) in enumerate(zip(images, result, names)):
     for target in res.targets:
+        print(target.kps)
         img = img.astype(np.uint8)
         img = draw_box(img, target.bbox, (0, 0, 255), 2)
     img = img[:, :, ::-1]
-    plt.imsave(f"image/img_{name}", img)
+    plt.imsave(f"image/img_large_{name}", img)
 
